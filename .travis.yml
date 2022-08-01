@@ -1,0 +1,20 @@
+sudo: required
+services:
+        - docker
+
+before_install:
+        - docker build -t sakhtar4/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+        - docker run sakhtar4/react-test npm test -- --coverage
+
+after_success:
+        - docker build -t sakhtar4/multi-client ./client
+        - docker build -t sakhtar4/multi-nginx ./nginx
+        - docker build -t sakhtar4/multi-server ./server
+        - docker build -t sakhtar4/multi-worker ./worker
+        - echo "$DOCKER_PASSWORD" | docker-login -u "$DOCKER_ID" --password-stdin
+        - docker push sakhtar4/multi-client
+        - docker push sakhtar4/multi-nginx
+        - docker push sakhtar4/multi-server
+        - docker push sakhtar4/multi-worker
